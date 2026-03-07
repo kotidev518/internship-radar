@@ -2,6 +2,7 @@ import asyncio
 import logging
 from scrapers.base_scraper import BaseScraper, KEYWORDS
 from database.connection import SessionLocal
+from playwright.async_api import async_playwright
 
 logger = logging.getLogger(__name__)
 
@@ -15,35 +16,38 @@ class LinkedinScraper(BaseScraper):
         logger.info(f"Starting {self.source_name} scraper...")
         db = SessionLocal()
         try:
-            for keyword in KEYWORDS:
-                formatted_kw = keyword.replace(" ", "%20")
-                search_url = f"https://www.linkedin.com/jobs/search/?keywords={formatted_kw}&f_E=1"
-                
-                await self.add_delay()
-                logger.info(f"[{self.source_name}] Scraping keyword: {keyword} -> {search_url}")
-                
-                # Playwright logic:
-                # async with async_playwright() as p:
-                #     browser = await p.chromium.launch(headless=True)
-                #     context = await browser.new_context(user_agent=self.get_random_user_agent())
-                #     page = await context.new_page()
-                #     await page.goto(search_url, wait_until="networkidle")
-                #     cards = await page.query_selector_all(".base-card")
-                #     for card in cards:
-                #         title = await card.query_selector(".base-search-card__title")
-                #         company = await card.query_selector(".base-search-card__subtitle")
-                #         location = await card.query_selector(".job-search-card__location")
-                #         link = await card.get_attribute("href")
-                #         if title and link:
-                #             self.save_raw_job(db, {
-                #                 "title": (await title.inner_text()).strip(),
-                #                 "company": (await company.inner_text()).strip() if company else "",
-                #                 "location": (await location.inner_text()).strip() if location else "",
-                #                 "description": "",
-                #                 "apply_link": link.strip(),
-                #             })
-                #     await browser.close()
-                
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                context = await browser.new_context(user_agent=self.get_random_user_agent())
+                page = await context.new_page()
+
+                for keyword in KEYWORDS:
+                    formatted_kw = keyword.replace(" ", "%20")
+                    search_url = f"https://www.linkedin.com/jobs/search/?keywords={formatted_kw}&f_E=1"
+                    
+                    await self.add_delay()
+                    logger.info(f"[{self.source_name}] Scraping keyword: {keyword} -> {search_url}")
+                    
+                    try:
+                        await page.goto(search_url, wait_until="networkidle")
+                        cards = await page.query_selector_all(".base-card")
+                        for card in cards:
+                            title = await card.query_selector(".base-search-card__title")
+                            company = await card.query_selector(".base-search-card__subtitle")
+                            location = await card.query_selector(".job-search-card__location")
+                            link = await card.get_attribute("href")
+                            if title and link:
+                                self.save_raw_job(db, {
+                                    "title": (await title.inner_text()).strip(),
+                                    "company": (await company.inner_text()).strip() if company else "",
+                                    "location": (await location.inner_text()).strip() if location else "",
+                                    "description": "",
+                                    "apply_link": link.strip(),
+                                })
+                    except Exception as e:
+                        logger.error(f"Error scraping {search_url}: {e}")
+                        
+                await browser.close()
         finally:
             db.close()
         logger.info(f"Finished {self.source_name} scraper.")
