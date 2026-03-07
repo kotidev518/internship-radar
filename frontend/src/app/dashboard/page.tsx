@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { internshipAPI, applicationAPI } from "../../lib/api";
+import { internshipAPI, applicationAPI } from "@/lib/api";
 import { MapPin, Briefcase, Tag, Link as LinkIcon, Save, Send } from "lucide-react";
 
 export default function Dashboard() {

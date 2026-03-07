@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { applicationAPI } from "../../lib/api";
+import { applicationAPI } from "@/lib/api";
 import { motion } from "framer-motion";
 
 const STATUSES = ["saved", "applied", "interview", "rejected", "offer"];
