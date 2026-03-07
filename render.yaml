@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: internship-radar-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free # Change to starter/pro for always-on
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        value: http://localhost:3000 # Default, override in Dashboard to Vercel URL
+      - key: SCRAPER_INTERVAL
+        value: 12
+      - key: BATCH_SIZE
+        value: 20
+      - key: ENVIRONMENT
+        value: production
