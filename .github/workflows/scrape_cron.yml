@@ -13,4 +13,4 @@ jobs:
       - name: Ping Hugging Face Space Trigger Endpoint
         run: |
           # Replace with your actual Hugging Face Space URL when known
-          curl -X POST https://your-hf-space-url.hf.space/api/trigger-scrape
+          curl -X POST https://balu-19-internship-radar.hf.space/api/trigger-scrape
