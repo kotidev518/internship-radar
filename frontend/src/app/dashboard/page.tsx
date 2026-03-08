@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { internshipAPI, applicationAPI } from "@/lib/api";
+import { testFetchAction } from "@/lib/testFetch";
 import { MapPin, Briefcase, Tag, Link as LinkIcon, Save, Send } from "lucide-react";
 
 export default function Dashboard() {
@@ -57,6 +58,17 @@ export default function Dashboard() {
         }
     };
 
+    const handleScrape = async () => {
+        try {
+            alert("Starting realtime scrape in the background. This will take a few minutes...");
+            const response = await internshipAPI.triggerScrape();
+            console.log("Scrape triggered:", response);
+        } catch (error) {
+            console.error("Failed to start scrape:", error);
+            alert("Failed to start scrape.");
+        }
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -65,6 +77,9 @@ export default function Dashboard() {
                     <p className="text-slate-400">Find your next big opportunity curated by AI.</p>
                 </div>
                 <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
+                    <button type="button" onClick={handleScrape} className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-medium shadow-lg shadow-pink-500/20 transition-all whitespace-nowrap">
+                        Fetch Realtime
+                    </button>
                     <input
                         type="text"
                         placeholder="Search roles, companies..."

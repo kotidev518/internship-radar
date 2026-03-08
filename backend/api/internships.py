@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import List, Optional
 from database.connection import get_db
 from database.models import Internship
 from api.schemas import InternshipResponse
+from scrapers.run_scrapers import run_all_scrapers
 
 router = APIRouter(prefix="/internships", tags=["Internships"])
 
@@ -17,6 +18,13 @@ def get_internships(
     """Get all internships with pagination."""
     internships = db.query(Internship).order_by(Internship.created_at.desc()).offset(skip).limit(limit).all()
     return internships
+
+@router.post("/scrape")
+async def trigger_scraping(background_tasks: BackgroundTasks):
+    """Trigger the master scraper in the background."""
+    background_tasks.add_task(run_all_scrapers)
+    return {"message": "Scraping started in the background. It may take a few minutes."}
+
 
 @router.get("/search", response_model=List[InternshipResponse])
 def search_internships(

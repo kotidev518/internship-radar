@@ -5,6 +5,8 @@ from config.settings import settings
 from api import internships, applications
 import logging
 from config.logging_config import setup_logging
+from fastapi import BackgroundTasks
+from scheduler.scheduler import scheduled_pipeline
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -38,6 +40,16 @@ app.include_router(applications.router, prefix="/api")
 @app.get("/")
 def root():
     return {"message": "Welcome to Internship Radar API", "docs": "/docs"}
+
+@app.post("/api/trigger-scrape")
+async def trigger_scrape_endpoint(background_tasks: BackgroundTasks):
+    """
+    Endpoint to manually trigger the scraping pipeline.
+    Useful for triggering from external cron jobs (like GitHub Actions)
+    if the Hugging Face Space was asleep during the normal schedule.
+    """
+    background_tasks.add_task(scheduled_pipeline)
+    return {"message": "Scraping pipeline triggered in the background"}
 
 if __name__ == "__main__":
     import uvicorn

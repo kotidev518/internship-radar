@@ -16,6 +16,10 @@ export const internshipAPI = {
         const res = await api.get(`/internships/search`, { params });
         return res.data;
     },
+    triggerScrape: async () => {
+        const res = await api.post(`/internships/scrape`);
+        return res.data;
+    },
 };
 
 export const applicationAPI = {
