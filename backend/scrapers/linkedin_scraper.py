@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from urllib.parse import urljoin
 from scrapers.base_scraper import BaseScraper, KEYWORDS
 from database.connection import SessionLocal
 from playwright.async_api import async_playwright
@@ -35,14 +36,15 @@ class LinkedinScraper(BaseScraper):
                             title = await card.query_selector(".base-search-card__title")
                             company = await card.query_selector(".base-search-card__subtitle")
                             location = await card.query_selector(".job-search-card__location")
-                            link = await card.get_attribute("href")
-                            if title and link:
+                            link_el = await card.query_selector("a.base-card__full-link, a")
+                            href = await link_el.get_attribute("href") if link_el else None
+                            if title and href:
                                 self.save_raw_job(db, {
                                     "title": (await title.inner_text()).strip(),
                                     "company": (await company.inner_text()).strip() if company else "",
                                     "location": (await location.inner_text()).strip() if location else "",
                                     "description": "",
-                                    "apply_link": link.strip(),
+                                    "apply_link": urljoin("https://www.linkedin.com", href.strip()),
                                 })
                     except Exception as e:
                         logger.error(f"Error scraping {search_url}: {e}")

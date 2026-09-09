@@ -1,29 +1,33 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from database.init_db import init_database
 from config.settings import settings
 from api import internships, applications
 import logging
 from config.logging_config import setup_logging
-from fastapi import BackgroundTasks
-from scheduler.scheduler import scheduled_pipeline
+from scheduler.scheduler import scheduled_pipeline, start_scheduler
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Internship Radar API", description="Backend for the Internship Radar Next.js Dashboard")
-
-# Initialize database and scheduler
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_database()
-    from scheduler.scheduler import start_scheduler
-    start_scheduler()
+    scheduler = start_scheduler()
+    yield
+    if scheduler and scheduler.running:
+        scheduler.shutdown()
+
+app = FastAPI(
+    title="Internship Radar API",
+    description="Backend for the Internship Radar Next.js Dashboard",
+    lifespan=lifespan
+)
 
 # Set up CORS for Next.js frontend
-origins = [settings.frontend_url, "http://localhost:3000"]
-if settings.frontend_url != "http://localhost:3000":
-    origins.append("http://localhost:3000") # Ensure local dev still works
+raw_origins = [settings.frontend_url, "http://localhost:3000", "http://127.0.0.1:3000"]
+origins = list({origin.rstrip('/') for origin in raw_origins if origin})
 
 app.add_middleware(
     CORSMiddleware,

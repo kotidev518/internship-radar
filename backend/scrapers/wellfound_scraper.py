@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from urllib.parse import urljoin
 from scrapers.base_scraper import BaseScraper, KEYWORDS
 from database.connection import SessionLocal
 from playwright.async_api import async_playwright
@@ -38,13 +39,14 @@ class WellfoundScraper(BaseScraper):
                             link_el = await card.query_selector("a.job-title")
                             if title_el and link_el:
                                 href = await link_el.get_attribute("href")
-                                self.save_raw_job(db, {
-                                    "title": (await title_el.inner_text()).strip(),
-                                    "company": (await company_el.inner_text()).strip() if company_el else "",
-                                    "location": (await location_el.inner_text()).strip() if location_el else "",
-                                    "description": "",
-                                    "apply_link": f"https://wellfound.com{href}" if href else "",
-                                })
+                                if href:
+                                    self.save_raw_job(db, {
+                                        "title": (await title_el.inner_text()).strip(),
+                                        "company": (await company_el.inner_text()).strip() if company_el else "",
+                                        "location": (await location_el.inner_text()).strip() if location_el else "",
+                                        "description": "",
+                                        "apply_link": urljoin("https://wellfound.com", href.strip()),
+                                    })
                     except Exception as e:
                         logger.error(f"Error scraping {search_url}: {e}")
                         

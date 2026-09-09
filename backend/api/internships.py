@@ -5,7 +5,7 @@ from typing import List, Optional
 from database.connection import get_db
 from database.models import Internship
 from api.schemas import InternshipResponse
-from scrapers.run_scrapers import run_all_scrapers
+from scheduler.scheduler import scheduled_pipeline
 
 router = APIRouter(prefix="/internships", tags=["Internships"])
 
@@ -21,9 +21,9 @@ def get_internships(
 
 @router.post("/scrape")
 async def trigger_scraping(background_tasks: BackgroundTasks):
-    """Trigger the master scraper in the background."""
-    background_tasks.add_task(run_all_scrapers)
-    return {"message": "Scraping started in the background. It may take a few minutes."}
+    """Trigger the master scraper and AI processing pipeline in the background."""
+    background_tasks.add_task(scheduled_pipeline)
+    return {"message": "Scraping and AI processing pipeline started in the background."}
 
 
 @router.get("/search", response_model=List[InternshipResponse])

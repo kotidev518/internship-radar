@@ -8,6 +8,7 @@ location TEXT,
 description TEXT,
 apply_link TEXT UNIQUE,
 source TEXT,
+processed BOOLEAN DEFAULT FALSE,
 scraped_at TIMESTAMP DEFAULT NOW()
 );
 
