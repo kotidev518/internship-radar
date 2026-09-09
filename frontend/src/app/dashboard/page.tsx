@@ -3,11 +3,22 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { internshipAPI, applicationAPI } from "@/lib/api";
-import { testFetchAction } from "@/lib/testFetch";
-import { MapPin, Briefcase, Tag, Link as LinkIcon, Save, Send } from "lucide-react";
+import { MapPin, Briefcase, Tag, Save, Send } from "lucide-react";
+
+interface InternshipItem {
+    id: number;
+    role: string;
+    company: string;
+    category: string;
+    location: string;
+    remote: boolean;
+    stipend?: string;
+    skills?: string[];
+    apply_link: string;
+}
 
 export default function Dashboard() {
-    const [internships, setInternships] = useState<any[]>([]);
+    const [internships, setInternships] = useState<InternshipItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
 
@@ -27,7 +38,7 @@ export default function Dashboard() {
         }
     };
 
-    const handleSearch = async (e: any) => {
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
@@ -44,13 +55,13 @@ export default function Dashboard() {
         try {
             await applicationAPI.create(id, "saved");
             alert("Saved to Tracker!");
-        } catch (error) {
+        } catch {
             alert("Already tracked or error occurred.");
         }
     };
 
     const handleApply = async (id: number, link: string) => {
-        const newWindow = window.open(link, '_blank');
+        window.open(link, '_blank');
         try {
             await applicationAPI.create(id, "applied");
         } catch (error) {
@@ -114,7 +125,7 @@ export default function Dashboard() {
                     }}
                 >
                     <AnimatePresence>
-                        {internships.map((internship) => (
+                        {internships.map((internship: InternshipItem) => (
                             <motion.div
                                 key={internship.id}
                                 variants={{
