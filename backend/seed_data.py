@@ -6,7 +6,7 @@ load_dotenv()
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database.models import Base, Internship, Application
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 db_url = os.getenv("DATABASE_URL")
 engine = create_engine(db_url)
@@ -171,11 +171,11 @@ session.commit()
 
 # --- Sample Applications (track a few internships) ---
 applications_data = [
-    {"internship_idx": 0, "status": "applied", "notes": "Applied via referral from a friend at Google.", "applied_date": datetime.utcnow() - timedelta(days=5)},
-    {"internship_idx": 1, "status": "interview", "notes": "Completed first round, waiting for ML system design round.", "applied_date": datetime.utcnow() - timedelta(days=10)},
+    {"internship_idx": 0, "status": "applied", "notes": "Applied via referral from a friend at Google.", "applied_date": datetime.now(timezone.utc) - timedelta(days=5)},
+    {"internship_idx": 1, "status": "interview", "notes": "Completed first round, waiting for ML system design round.", "applied_date": datetime.now(timezone.utc) - timedelta(days=10)},
     {"internship_idx": 2, "status": "saved", "notes": "Looks interesting, need to prep for Java interviews first."},
-    {"internship_idx": 4, "status": "applied", "notes": "Submitted application with portfolio link.", "applied_date": datetime.utcnow() - timedelta(days=3)},
-    {"internship_idx": 10, "status": "offer", "notes": "Received offer! Need to decide by end of month.", "applied_date": datetime.utcnow() - timedelta(days=20)},
+    {"internship_idx": 4, "status": "applied", "notes": "Submitted application with portfolio link.", "applied_date": datetime.now(timezone.utc) - timedelta(days=3)},
+    {"internship_idx": 10, "status": "offer", "notes": "Received offer! Need to decide by end of month.", "applied_date": datetime.now(timezone.utc) - timedelta(days=20)},
 ]
 
 print("\nInserting sample applications...")

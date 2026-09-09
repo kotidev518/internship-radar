@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import List, Dict
+from urllib.parse import urljoin
 from scrapers.base_scraper import BaseScraper
 from database.connection import SessionLocal
 from playwright.async_api import async_playwright
@@ -49,7 +50,7 @@ class CompanyPagesScraper(BaseScraper):
                                     "company": company["name"],
                                     "location": "",
                                     "description": "",
-                                    "apply_link": href if href.startswith("http") else company["url"] + href,
+                                    "apply_link": urljoin(company["url"], href.strip()),
                                 })
                     except Exception as e:
                         logger.error(f"Error scraping {company['url']}: {e}")

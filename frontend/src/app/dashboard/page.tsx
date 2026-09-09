@@ -3,11 +3,22 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { internshipAPI, applicationAPI } from "@/lib/api";
-import { testFetchAction } from "@/lib/testFetch";
-import { MapPin, Briefcase, Tag, Link as LinkIcon, Save, Send } from "lucide-react";
+import { MapPin, Briefcase, Tag, Save, Send } from "lucide-react";
+
+interface InternshipItem {
+    id: number;
+    role: string;
+    company: string;
+    category: string;
+    location: string;
+    remote: boolean;
+    stipend?: string;
+    skills?: string[];
+    apply_link: string;
+}
 
 export default function Dashboard() {
-    const [internships, setInternships] = useState<any[]>([]);
+    const [internships, setInternships] = useState<InternshipItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
 
@@ -27,7 +38,7 @@ export default function Dashboard() {
         }
     };
 
-    const handleSearch = async (e: any) => {
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
@@ -44,17 +55,17 @@ export default function Dashboard() {
         try {
             await applicationAPI.create(id, "saved");
             alert("Saved to Tracker!");
-        } catch (error) {
+        } catch {
             alert("Already tracked or error occurred.");
         }
     };
 
     const handleApply = async (id: number, link: string) => {
+        window.open(link, '_blank');
         try {
             await applicationAPI.create(id, "applied");
-            window.open(link, '_blank');
         } catch (error) {
-            window.open(link, '_blank');
+            console.error("Failed to update application status to applied", error);
         }
     };
 
@@ -114,7 +125,7 @@ export default function Dashboard() {
                     }}
                 >
                     <AnimatePresence>
-                        {internships.map((internship) => (
+                        {internships.map((internship: InternshipItem) => (
                             <motion.div
                                 key={internship.id}
                                 variants={{
@@ -151,14 +162,14 @@ export default function Dashboard() {
                                     <div className="flex items-start text-sm text-slate-400 mt-3 pt-3 border-t border-slate-800/50">
                                         <Tag className="w-4 h-4 mr-2 mt-0.5 shrink-0" />
                                         <div className="flex flex-wrap gap-1">
-                                            {internship.skills.slice(0, 4).map((skill: string, i: number) => (
+                                            {(internship.skills || []).slice(0, 4).map((skill: string, i: number) => (
                                                 <span key={i} className="px-2 py-0.5 rounded bg-slate-800/50 text-xs text-slate-300">
                                                     {skill}
                                                 </span>
                                             ))}
-                                            {internship.skills.length > 4 && (
+                                            {(internship.skills || []).length > 4 && (
                                                 <span className="px-2 py-0.5 rounded bg-slate-800/50 text-xs text-slate-500">
-                                                    +{internship.skills.length - 4}
+                                                    +{(internship.skills || []).length - 4}
                                                 </span>
                                             )}
                                         </div>

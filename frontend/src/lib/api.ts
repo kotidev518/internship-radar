@@ -12,7 +12,7 @@ export const internshipAPI = {
         const res = await api.get(`/internships`, { params: { skip, limit } });
         return res.data;
     },
-    search: async (params: any) => {
+    search: async (params: Record<string, unknown>) => {
         const res = await api.get(`/internships/search`, { params });
         return res.data;
     },

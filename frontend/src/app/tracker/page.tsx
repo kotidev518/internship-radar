@@ -2,12 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { applicationAPI } from "@/lib/api";
-import { motion } from "framer-motion";
 
 const STATUSES = ["saved", "applied", "interview", "rejected", "offer"];
 
+interface Internship {
+    role?: string;
+    company?: string;
+    location?: string;
+}
+
+interface ApplicationItem {
+    id: number;
+    status: string;
+    updated_at?: string;
+    internship?: Internship;
+}
+
 export default function Tracker() {
-    const [applications, setApplications] = useState<any[]>([]);
+    const [applications, setApplications] = useState<ApplicationItem[]>([]);
 
     useEffect(() => {
         fetchApps();
@@ -72,20 +84,19 @@ export default function Tracker() {
 
                             <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                                 {columnApps.map((app) => (
-                                    <motion.div
-                                        layoutId={`app-${app.id}`}
+                                    <div
                                         key={app.id}
                                         draggable
-                                        onDragStart={(e: any) => handleDragStart(e, app.id)}
+                                        onDragStart={(e: React.DragEvent<HTMLDivElement>) => handleDragStart(e, app.id)}
                                         className="bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                                     >
-                                        <h4 className="font-medium text-white line-clamp-1">{app.internship.role}</h4>
-                                        <p className="text-sm text-indigo-400 mb-2">{app.internship.company}</p>
+                                        <h4 className="font-medium text-white line-clamp-1">{app.internship?.role || "Untitled Role"}</h4>
+                                        <p className="text-sm text-indigo-400 mb-2">{app.internship?.company || "Unknown Company"}</p>
                                         <div className="flex justify-between items-center text-xs text-slate-400">
-                                            <span>{app.internship.location}</span>
-                                            <span>{new Date(app.updated_at).toLocaleDateString()}</span>
+                                            <span>{app.internship?.location || ""}</span>
+                                            <span>{app.updated_at ? new Date(app.updated_at).toLocaleDateString() : ""}</span>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 ))}
                             </div>
                         </div>
