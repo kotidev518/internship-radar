@@ -33,10 +33,10 @@ async def test_internshala_scraper(mocker):
     
     # Card element lookups
     mock_card.query_selector.side_effect = lambda selector: {
-        ".heading_4_5.profile": mock_title,
-        ".heading_6.company_name": mock_company,
-        ".location_link": mock_location,
-        ".heading_4_5.profile a": mock_link,
+        "a.job-title-href, .heading_4_5.profile, .job-internship-name a": mock_title,
+        ".company-name, .heading_6.company_name": mock_company,
+        ".locations span, .location_link": mock_location,
+        "a.job-title-href, .heading_4_5.profile a": mock_link,
     }.get(selector, None)
     
     # Connect playwright mocks

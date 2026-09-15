@@ -37,7 +37,8 @@ class CompanyPagesScraper(BaseScraper):
                     logger.info(f"[{self.source_name}] Scraping: {company['name']} -> {company['url']}")
 
                     try:
-                        await page.goto(company["url"], wait_until="networkidle")
+                        await page.goto(company["url"], wait_until="domcontentloaded", timeout=20000)
+                        await page.wait_for_timeout(1000)
                         # Each company page has a different DOM structure
                         # Extract job cards by common patterns (h2/h3 with link)
                         links = await page.query_selector_all("a")

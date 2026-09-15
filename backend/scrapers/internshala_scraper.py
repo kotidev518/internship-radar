@@ -28,13 +28,14 @@ class InternshalaScraper(BaseScraper):
                     logger.info(f"[{self.source_name}] Scraping keyword: {keyword} -> {search_url}")
                     
                     try:
-                        await page.goto(search_url, wait_until="networkidle")
+                        await page.goto(search_url, wait_until="domcontentloaded", timeout=20000)
+                        await page.wait_for_timeout(1000)
                         cards = await page.query_selector_all(".individual_internship")
                         for card in cards:
-                            title_el = await card.query_selector(".heading_4_5.profile")
-                            company_el = await card.query_selector(".heading_6.company_name")
-                            location_el = await card.query_selector(".location_link")
-                            link_el = await card.query_selector(".heading_4_5.profile a")
+                            title_el = await card.query_selector("a.job-title-href, .heading_4_5.profile, .job-internship-name a")
+                            company_el = await card.query_selector(".company-name, .heading_6.company_name")
+                            location_el = await card.query_selector(".locations span, .location_link")
+                            link_el = await card.query_selector("a.job-title-href, .heading_4_5.profile a")
                             
                             if title_el and link_el:
                                 href = await link_el.get_attribute("href")

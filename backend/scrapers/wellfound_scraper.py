@@ -30,7 +30,8 @@ class WellfoundScraper(BaseScraper):
                     logger.info(f"[{self.source_name}] Scraping keyword: {keyword} -> {search_url}")
 
                     try:
-                        await page.goto(search_url, wait_until="networkidle")
+                        await page.goto(search_url, wait_until="domcontentloaded", timeout=20000)
+                        await page.wait_for_timeout(1000)
                         cards = await page.query_selector_all("[data-test='StartupResult']")
                         for card in cards:
                             title_el = await card.query_selector("a.job-title")

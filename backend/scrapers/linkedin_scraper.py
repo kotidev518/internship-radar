@@ -30,8 +30,9 @@ class LinkedinScraper(BaseScraper):
                     logger.info(f"[{self.source_name}] Scraping keyword: {keyword} -> {search_url}")
                     
                     try:
-                        await page.goto(search_url, wait_until="networkidle")
-                        cards = await page.query_selector_all(".base-card")
+                        await page.goto(search_url, wait_until="domcontentloaded", timeout=20000)
+                        await page.wait_for_timeout(1000)
+                        cards = await page.query_selector_all(".base-card, .job-search-card, li")
                         for card in cards:
                             title = await card.query_selector(".base-search-card__title")
                             company = await card.query_selector(".base-search-card__subtitle")
